@@ -28,12 +28,10 @@ class ApiController extends Controller
     private $methodMap = [
         'index'            => 'index',
         'pin_request'      => 'pinRequest',
-        'pin_verification' => 'pinVerification',
-        'lookup'           => 'lookup',
-        'footer'           => 'footer',
+        'pin_verification' => 'pinVerification'
     ];
 
-    public function handle(Request $request, $country, $partner, $operator, $offer_name, $method = 'index')
+    public function handle(Request $request, $partner, $country, $operator, $offer_name, $method = 'index')
     {
         $country  = strtolower($country);
         $partner  = strtolower($partner);
@@ -41,7 +39,7 @@ class ApiController extends Controller
 
         $offerClass = Str::studly($offer_name); // gamebase -> Gamebase, game-cafe -> GameCafe
 
-        $fqcn = 'App\\Http\\Controllers\\services\\' . $country . '\\' . $partner . '\\' . $operator . '\\' . $offerClass;
+        $fqcn = 'App\\Http\\Controllers\\services\\' . $partner . '\\' . $country . '\\' . $operator . '\\' . $offerClass;
 
         if (!class_exists($fqcn)) {
             abort(404, 'offer not found');
