@@ -38,8 +38,8 @@ class Gamifya extends Controller
             $msisdn = $request->input('msisdn');
             $ip = $request->has('ip') ? $request->input('ip') : $request->ip();
             $ua = $request->has('ua') ? $request->input('ua') : $request->userAgent();
-            $cta_btn = $request->input('cta_btn');
-            $txid = strtoupper(Str::random(16));
+            $cta_btn = $request->has('cta_btn') ? $request->input('cta_btn') : '#cta_btn';
+            $txid = $request->has('txid') ? $request->input('txid') : uniqid();
 
             $response = Http::get($this->config['send_pin'], [
                 'cid' => $this->config['cid'],
@@ -74,6 +74,8 @@ class Gamifya extends Controller
                 return response()->json([
                     'status' => '1',
                     'message' => 'pin sent',
+                    'txid' => $txid,
+                    'cta_btn' => $cta_btn,
                     'script' => $script,
                     'raw' => [
                         'pin_request' => $response->body(),
@@ -85,6 +87,8 @@ class Gamifya extends Controller
             return response()->json([
                 'status' => '0',
                 'message' => 'pin failed',
+                'txid' => $txid,
+                'cta_btn' => $cta_btn,
                 'script' => '',
                 'raw' => [
                     'pin_request' => $response->body(),
@@ -113,6 +117,7 @@ class Gamifya extends Controller
             // These MUST be the same values used in the antifraud request
             $txid = $request->input('txid');
             $ts = $request->input('ts');
+            $cta_btn = $request->has('cta_btn') ? $request->input('cta_btn') : '#cta_btn';
 
             $response = Http::get($this->config['verify_pin'], [
                 'cid' => $this->config['cid'],
@@ -128,6 +133,8 @@ class Gamifya extends Controller
                 return response()->json([
                     'status' => '1',
                     'message' => 'pin verified',
+                    'txid' => $txid,
+                    'cta_btn' => $cta_btn,
                     'raw' => $response->body(),
                 ]);
             }
@@ -135,6 +142,8 @@ class Gamifya extends Controller
             return response()->json([
                 'status' => '0',
                 'message' => 'pin verification failed',
+                'txid' => $txid,
+                'cta_btn' => $cta_btn,
                 'raw' => $response->body(),
             ]);
 
