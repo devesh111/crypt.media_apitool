@@ -3,9 +3,10 @@
 use App\Http\Controllers\ApiController;
 use Illuminate\Support\Facades\Route;
 
-Route::match(['get', 'post'], '/{partner}/{country}/{operator}/{offer_name}/{method?}', [ApiController::class, 'handle'])
+Route::match(['get', 'post'], '/{company}/{partner}/{country}/{operator}/{offer_name}/{method?}', [ApiController::class, 'handle'])
     ->where([
         'country'    => '[a-zA-Z]+',
+        'company'    => '[a-zA-Z]+',
         'partner'    => '[a-zA-Z]+',
         'operator'   => '[a-zA-Z]+',
         'offer_name' => '[a-zA-Z0-9_-]+',

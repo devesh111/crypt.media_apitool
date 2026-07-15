@@ -1,5 +1,5 @@
 <?php
-namespace App\Http\Controllers\services\numero\iq\asiacell;
+namespace App\Http\Controllers\services\cryptmedia\numero\iq\asiacell;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;

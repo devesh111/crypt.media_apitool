@@ -7,18 +7,13 @@ use Illuminate\Support\Str;
 
 /**
  * Generic dispatcher for:
- *   /{country}/{partner}/{operator}/{offer_name}/{method?}
+ *   /{company}/{country}/{partner}/{operator}/{offer_name}/{method?}
  *
  * Resolves to:
- *   App\Http\Controllers\services\{country}\{partner}\{operator}\{OfferName}
+ *   App\Http\Controllers\services\{company}\{country}\{partner}\{operator}\{OfferName}
  *
- * e.g. /iq/numero/zain/gamebase/pin_request ->
- *      App\Http\Controllers\services\iq\numero\zain\Gamebase::pinRequest()
- *
- * Onboarding a new offer/partner/operator = drop in a new controller
- * (+ matching view folder) at the right namespace/path. No new routes,
- * no DB entry required.
  */
+
 class ApiController extends Controller
 {
     /**
@@ -31,15 +26,16 @@ class ApiController extends Controller
         'pin_verification' => 'pinVerification'
     ];
 
-    public function handle(Request $request, $partner, $country, $operator, $offer_name, $method = 'index')
+    public function handle(Request $request, $company, $partner, $country, $operator, $offer_name, $method = 'index')
     {
+        $company  = strtolower($company);
         $country  = strtolower($country);
         $partner  = strtolower($partner);
         $operator = strtolower($operator);
 
         $offerClass = Str::studly($offer_name); // gamebase -> Gamebase, game-cafe -> GameCafe
 
-        $fqcn = 'App\\Http\\Controllers\\services\\' . $partner . '\\' . $country . '\\' . $operator . '\\' . $offerClass;
+        $fqcn = 'App\\Http\\Controllers\\services\\' . $company . '\\' . $partner . '\\' . $country . '\\' . $operator . '\\' . $offerClass;
 
         if (!class_exists($fqcn)) {
             abort(404, 'offer not found');
@@ -55,6 +51,7 @@ class ApiController extends Controller
         // can build its own view name / callback URLs dynamically instead
         // of hardcoding them.
         $request->attributes->set('route_context', [
+            'company'    => $company,
             'country'    => $country,
             'partner'    => $partner,
             'operator'   => $operator,
