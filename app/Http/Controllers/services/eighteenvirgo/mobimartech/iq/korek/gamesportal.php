@@ -1,5 +1,5 @@
 <?php
-namespace App\Http\Controllers\services\eighteenvirgo\test\iq\korek;
+namespace App\Http\Controllers\services\eighteenvirgo\mobimartech\iq\korek;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
