@@ -6,25 +6,25 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
-class Gamifya extends Controller
+class Aistylist extends Controller
 {
     private $config = [
         'send_pin' => 'https://api.chefrecipes.net/api/v1/aistylist/kw/subscribe',
-        'verify_pin' => 'http://143.198.213.74/prod/IQAGcmp/verifyPIN',
-        'antifraud_url' => 'https://antifraud-vms.iraqcom.com/Prepare',
-        'service_name' => 'gamifya',
+        'verify_pin' => 'https://api.chefrecipes.net/api/v1/aistylist/kw/subscribe',
+        'service_name' => 'aistylist',
         'unsub_code' => '0',
         'sub_code' => '',
-        'shortcode' => '2162',
+        'shortcode' => '',
         'pack_validity' => '1',
-        'pack_price' => '360',
-        'currency' => 'IQD',
+        'pack_price' => '0',
+        'currency' => 'KWD',
         'pin_length' => 4,
 
-        // custom params
-        'cid' => '94',
-        'channel_id' => 22796,
-
+        // custom fields
+        'action_pin_request' => 'subscribe',
+        'action_pin_verify' => 'verify',
+        'networkname' => 'test',
+        'fullUrl' => 'http://kw.test.net/test/',
     ];
 
 
@@ -38,25 +38,25 @@ class Gamifya extends Controller
         try {
             $msisdn = $request->input('msisdn');
             $ip = $request->has('ip') ? $request->input('ip') : $request->ip();
-            $ua = $request->has('ua') ? $request->input('ua') : $request->userAgent();
             $cta_btn = $request->has('cta_btn') ? $request->input('cta_btn') : '#cta_btn';
             $txid = $request->has('txid') ? $request->input('txid') : uniqid();
 
-            $antifraud_response = $this->getAntifraudKeys($request, $txid, 1);
-
-            $antifraudid = $antifraud_response['antifraudid'];
-            $uniqid = $antifraud_response['uniqid'];
-            $script = $antifraud_response['script'];
-
-            $response = Http::get($this->config['send_pin'], [
-                'cid' => $this->config['cid'],
+            $response = Http::post($this->config['send_pin'], [
+                'action' => $this->config['action_pin_request'],
+                'networkname' => $this->config['networkname'],
+                'clickid' => $txid,
                 'msisdn' => $msisdn,
-                'ip' => $ip,
-                'ua' => $ua,
-                'sessionKey' => $antifraudid
+                'userIp' => $ip,
+                'fullUrl' => $this->config['fullUrl'],
+                'headers' => [
+                    'cf-connecting-ip' => $ip
+                ]
             ]);
 
-            if ($response->successful() && $response->json('response') == 'SUCCESS') {
+            if ($response->successful()) {
+                $operator = $response->json('operator');
+                $userID = $response->json('userID');
+                $script = $response->json('script');
 
                 return response()->json([
                     'status' => '1',
@@ -64,11 +64,10 @@ class Gamifya extends Controller
                     'txid' => $txid,
                     'cta_btn' => $cta_btn,
                     'script' => $script,
-                    'antifraudid' => $antifraudid,
-                    'uniqid' => $uniqid,
+                    'user_id' => $userID,
+                    'operator' => $operator,
                     'raw' => [
-                        'pin_request' => $response->body(),
-                        'antifraud' => $antifraud_response,
+                        'pin_request' => $response->body()
                     ]
                 ]);
             }
@@ -80,8 +79,7 @@ class Gamifya extends Controller
                 'cta_btn' => $cta_btn,
                 'script' => '',
                 'raw' => [
-                    'pin_request' => $response->body(),
-                    'antifraud' => '',
+                    'pin_request' => $response->body()
                 ]
             ]);
 
@@ -95,36 +93,6 @@ class Gamifya extends Controller
             ]);
         }
     }
-
-    private function getAntifraudKeys($request, $clickId, $page, $msisdn = '')
-    {
-        $response = Http::get($this->config['antifraud_url'], [
-            'Page' => $page,
-            'ChannelID' => $this->config['channel_id'],
-            'ClickID' => $clickId,
-            'Headers' => base64_encode(json_encode($request->headers->all())),
-            'UserIP' => base64_encode($request->ip()),
-            'MSISDN' => $msisdn, // empty on MSISDN page, populated on OTP page
-        ]);
-
-        // Response headers from the antifraud API
-        $antifraudid = $response->header('antifrauduniqid');
-        $uniqid = $response->header('mcpuniqid');
-
-        // Extract the JS snippet (comment block onwards) from the body
-        $body = $response->body();
-        $script = null;
-
-        if (preg_match('/\/\*[\s\S]*/', $body, $matches)) {
-            $script = $matches[0];
-        }
-
-        return [
-            'antifraudid' => $antifraudid,
-            'uniqid' => $uniqid,
-            'script' => $script,
-        ];
-    }
     public function pinVerification(Request $request)
     {
         try {
@@ -133,19 +101,17 @@ class Gamifya extends Controller
             $ip = $request->has('ip') ? $request->input('ip') : $request->ip();
 
             $txid = $request->input('txid');
+            $user_id = $request->input('user_id');
             $cta_btn = $request->has('cta_btn') ? $request->input('cta_btn') : '#cta_btn';
 
-            $antifraud_response = $this->getAntifraudKeys($request, $txid, 2, $msisdn);
-
-            $response = Http::get($this->config['verify_pin'], [
-                'cid' => $this->config['cid'],
+            $response = Http::post($this->config['verify_pin'], [
+                'action' => $this->config['action_pin_verify'],
                 'msisdn' => $msisdn,
-                'pin' => $pin,
-                'ip' => $ip,
-                'sessionKey' => $antifraud_response['antifraudid']
+                'pincode' => $pin,
+                'userID' => $user_id,
             ]);
 
-            if ($response->successful() && $response->json('response') == 'SUCCESS') {
+            if ($response->successful()) {
 
                 return response()->json([
                     'status' => '1',
@@ -153,8 +119,7 @@ class Gamifya extends Controller
                     'txid' => $txid,
                     'cta_btn' => $cta_btn,
                     'raw' => [
-                        'pin_verification' => $response->body(),
-                        'antifraud' => $antifraud_response,
+                        'pin_verification' => $response->body()
                     ],
                 ]);
             }
@@ -165,8 +130,7 @@ class Gamifya extends Controller
                 'txid' => $txid,
                 'cta_btn' => $cta_btn,
                 'raw' => [
-                    'pin_verification' => $response->body(),
-                    'antifraud' => $antifraud_response,
+                    'pin_verification' => $response->body()
                 ],
             ]);
 
