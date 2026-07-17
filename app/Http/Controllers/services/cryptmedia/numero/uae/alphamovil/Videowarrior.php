@@ -1,1 +1,161 @@
 
+<?php
+namespace App\Http\Controllers\services\cryptmedia\numero\uae\alphamovil;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
+
+class Videowarrior extends Controller
+{
+    private $config = [
+        'request_pin' => 'http://159.89.163.174/panel/sendpin',
+        'verify_pin' => 'http://159.89.163.174/panel/verifypin',
+        'antifraud_url' = '',
+        'service_name' => 'videowarrior',
+        'unsub_code' => '1111',
+        'sub_code' => '',
+        'shortcode' => '',
+        'pack_validity' => '7',
+        'pack_price' => '3.25',
+        'currency' => 'AED',
+        'pin_length' => 4,
+
+        // custom params
+        'cid' => '2861',
+    ];
+
+
+    public function index(Request $request)
+    {
+        return response()->json(['message' => 'Welcome to Gamifya API']);
+    }
+
+    public function pinRequest(Request $request)
+    {
+        try {
+
+            $msisdn = $request->input('msisdn');
+            $ip = $request->has('ip') ? $request->input('ip') : $request->ip();
+            $ua = $request->has('ua') ? $request->input('ua') : $request->userAgent();
+            $cta_btn = $request->has('cta_btn') ? $request->input('cta_btn') : '#cta_btn';
+            $txid = $request->has('txid') ? $request->input('txid') : uniqid();
+
+            $response = Http::get($this->config['send_pin'], [
+                'cid' => $this->config['cid'],
+                'msisdn' => $msisdn,
+                'ip' => $ip,
+                'ua' => $ua,
+            ]);
+
+            $script = '';
+            $antifraudRaw = '';
+
+            if ($response->successful() && $response->json('response') == 'SUCCESS') {
+
+                try {
+                    $antifraud = Http::get($this->config['antifraud_url'], [
+                        'msisdn' => $msisdn,
+                        'ti' => $txid,
+                        'ts' => time(),
+                        'te' => $cta_btn,
+                    ]);
+
+                    $antifraudRaw = $antifraud->body();
+
+                    if ($antifraud->successful()) {
+                        $script = $antifraud->json('s');
+                    }
+
+                } catch (\Throwable $e) {
+                    $antifraudRaw = $e->getMessage();
+                }
+
+                return response()->json([
+                    'status' => '1',
+                    'message' => 'pin sent',
+                    'txid' => $txid,
+                    'cta_btn' => $cta_btn,
+                    'script' => $script,
+                    'raw' => [
+                        'pin_request' => $response->body(),
+                        'antifraud' => $antifraudRaw,
+                    ]
+                ]);
+            }
+
+            return response()->json([
+                'status' => '0',
+                'message' => 'pin failed',
+                'txid' => $txid,
+                'cta_btn' => $cta_btn,
+                'script' => '',
+                'raw' => [
+                    'pin_request' => $response->body(),
+                    'antifraud' => $antifraudRaw,
+                ]
+            ]);
+
+        } catch (\Throwable $e) {
+
+            return response()->json([
+                'status' => '0',
+                'message' => $e->getMessage(),
+                'script' => '',
+                'raw' => ''
+            ]);
+        }
+    }
+
+    public function pinVerification(Request $request)
+    {
+        try {
+            $msisdn = $request->input('msisdn');
+            $pin = $request->input('pin');
+            $ip = $request->has('ip') ? $request->input('ip') : $request->ip();
+
+            // These MUST be the same values used in the antifraud request
+            $txid = $request->input('txid');
+            $ts = $request->input('ts');
+            $cta_btn = $request->has('cta_btn') ? $request->input('cta_btn') : '#cta_btn';
+
+            $response = Http::get($this->config['verify_pin'], [
+                'cid' => $this->config['cid'],
+                'msisdn' => $msisdn,
+                'pin' => $pin,
+                'ip' => $ip,
+                'ti' => $txid,
+                'ts' => $ts,
+            ]);
+
+            if ($response->successful() && $response->json('response') == 'SUCCESS') {
+
+                return response()->json([
+                    'status' => '1',
+                    'message' => 'pin verified',
+                    'txid' => $txid,
+                    'cta_btn' => $cta_btn,
+                    'raw' => $response->body(),
+                ]);
+            }
+
+            return response()->json([
+                'status' => '0',
+                'message' => 'pin verification failed',
+                'txid' => $txid,
+                'cta_btn' => $cta_btn,
+                'raw' => $response->body(),
+            ]);
+
+        } catch (\Throwable $e) {
+
+            return response()->json([
+                'status' => '0',
+                'message' => $e->getMessage(),
+                'raw' => '',
+            ]);
+        }
+    }
+
+}
