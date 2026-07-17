@@ -24,6 +24,8 @@ class Videowarrior extends Controller
 
         // custom params
         'cid' => '2861',
+        'pub_id' => 'PUB1121',
+        'sub_pub_id' => '25978/PUB2212',
     ];
 
 
@@ -45,42 +47,22 @@ class Videowarrior extends Controller
             $response = Http::get($this->config['send_pin'], [
                 'cid' => $this->config['cid'],
                 'msisdn' => $msisdn,
-                'ip' => $ip,
+                'user_ip' => $ip,
                 'ua' => $ua,
+                'pub_id' => $this->config['pub_id'],
+                'sub_pub_id' => $this->config['sub_pub_id'],
+                'sessionKey' => '',
+                'timestamp' => time(),
             ]);
 
-            $script = '';
-            $antifraudRaw = '';
-
-            if ($response->successful() && $response->json('response') == 'SUCCESS') {
-
-                try {
-                    $antifraud = Http::get($this->config['antifraud_url'], [
-                        'msisdn' => $msisdn,
-                        'ti' => $txid,
-                        'ts' => time(),
-                        'te' => $cta_btn,
-                    ]);
-
-                    $antifraudRaw = $antifraud->body();
-
-                    if ($antifraud->successful()) {
-                        $script = $antifraud->json('s');
-                    }
-
-                } catch (\Throwable $e) {
-                    $antifraudRaw = $e->getMessage();
-                }
-
+            if ($response->successful()) {
                 return response()->json([
                     'status' => '1',
                     'message' => 'pin sent',
                     'txid' => $txid,
                     'cta_btn' => $cta_btn,
-                    'script' => $script,
                     'raw' => [
                         'pin_request' => $response->body(),
-                        'antifraud' => $antifraudRaw,
                     ]
                 ]);
             }
@@ -90,10 +72,8 @@ class Videowarrior extends Controller
                 'message' => 'pin failed',
                 'txid' => $txid,
                 'cta_btn' => $cta_btn,
-                'script' => '',
                 'raw' => [
                     'pin_request' => $response->body(),
-                    'antifraud' => $antifraudRaw,
                 ]
             ]);
 
@@ -102,7 +82,6 @@ class Videowarrior extends Controller
             return response()->json([
                 'status' => '0',
                 'message' => $e->getMessage(),
-                'script' => '',
                 'raw' => ''
             ]);
         }
