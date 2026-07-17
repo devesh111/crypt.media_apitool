@@ -1,6 +1,5 @@
-
 <?php
-namespace App\Http\Controllers\services\cryptmedia\numero\uae\alphamovil;
+namespace App\Http\Controllers\services\cryptmedia\numero\ae\alphamovil;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -10,9 +9,9 @@ use Illuminate\Support\Str;
 class Videowarrior extends Controller
 {
     private $config = [
-        'request_pin' => 'http://159.89.163.174/panel/sendpin',
+        'send_pin' => 'http://159.89.163.174/panel/sendpin',
         'verify_pin' => 'http://159.89.163.174/panel/verifypin',
-        'antifraud_url' = '',
+        'antifraud_url' => '',
         'service_name' => 'videowarrior',
         'unsub_code' => '1111',
         'sub_code' => '',
@@ -31,28 +30,36 @@ class Videowarrior extends Controller
 
     public function index(Request $request)
     {
-        return response()->json(['message' => 'Welcome to Gamifya API']);
+        $context = $request->attributes->get('route_context');
+
+        return view(
+            "services.{$context['company']}.{$context['partner']}.{$context['country']}.{$context['operator']}.{$context['offer_name']}.index",
+            [
+                'config' => $this->config,
+                'context' => $context,
+            ]
+        );
     }
 
     public function pinRequest(Request $request)
     {
         try {
-
             $msisdn = $request->input('msisdn');
             $ip = $request->has('ip') ? $request->input('ip') : $request->ip();
             $ua = $request->has('ua') ? $request->input('ua') : $request->userAgent();
             $cta_btn = $request->has('cta_btn') ? $request->input('cta_btn') : '#cta_btn';
             $txid = $request->has('txid') ? $request->input('txid') : uniqid();
+            $timestamp = time();
 
             $response = Http::get($this->config['send_pin'], [
                 'cid' => $this->config['cid'],
                 'msisdn' => $msisdn,
-                'user_ip' => $ip,
-                'ua' => $ua,
                 'pub_id' => $this->config['pub_id'],
                 'sub_pub_id' => $this->config['sub_pub_id'],
-                'sessionKey' => '',
-                'timestamp' => time(),
+                'user_ip' => $ip,
+                'ua' => $ua,
+                'sessionKey' => $txid,
+                'timestamp' => $timestamp,
             ]);
 
             if ($response->successful()) {
@@ -82,7 +89,7 @@ class Videowarrior extends Controller
             return response()->json([
                 'status' => '0',
                 'message' => $e->getMessage(),
-                'raw' => ''
+                'raw' => '',
             ]);
         }
     }
@@ -93,22 +100,27 @@ class Videowarrior extends Controller
             $msisdn = $request->input('msisdn');
             $pin = $request->input('pin');
             $ip = $request->has('ip') ? $request->input('ip') : $request->ip();
+            $ua = $request->has('ua') ? $request->input('ua') : $request->userAgent();
 
             // These MUST be the same values used in the antifraud request
-            $txid = $request->input('txid');
+            $txid = $request->has('txid') ? $request->input('txid') : uniqid();
             $ts = $request->input('ts');
             $cta_btn = $request->has('cta_btn') ? $request->input('cta_btn') : '#cta_btn';
+            $timestamp = time();
 
             $response = Http::get($this->config['verify_pin'], [
                 'cid' => $this->config['cid'],
                 'msisdn' => $msisdn,
-                'pin' => $pin,
-                'ip' => $ip,
-                'ti' => $txid,
-                'ts' => $ts,
+                'otp' => $pin,
+                'user_ip' => $ip,
+                'ua' => $ua,
+                'pub_id' => $this->config['pub_id'],
+                'sub_pub_id' => $this->config['sub_pub_id'],
+                'sessionKey' => $txid,
+                'timestamp' => $timestamp,
             ]);
 
-            if ($response->successful() && $response->json('response') == 'SUCCESS') {
+            if ($response->successful() && $response->json('status') == true) {
 
                 return response()->json([
                     'status' => '1',
