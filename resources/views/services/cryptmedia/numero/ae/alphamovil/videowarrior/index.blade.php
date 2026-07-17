@@ -566,7 +566,7 @@
                             <span data-lang="en">Video Warrior</span>
                         </p>
                         <p class="hero-subtitle">
-                            <span data-lang="en">Play fun games from various categories</span>
+                            <span data-lang="en">Best Video Streaming Site</span>
                         </p>
                     </div>
                 </div>
