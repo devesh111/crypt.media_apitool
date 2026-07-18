@@ -649,6 +649,9 @@
         </div>
     </div>
     <script>
+        let txid = '';
+        let cta_btn = '';
+
         const loader = document.getElementById('loader');
         const form = document.getElementById('fnum');
         const phoneInput = document.getElementById('tel');
@@ -678,7 +681,7 @@
                         'X-CSRF-TOKEN':'{{ csrf_token() }}'
                     },
                     body:JSON.stringify({
-                        msisdn:t
+                        msisdn:"971" + t,
                     })
                 });
 
@@ -714,7 +717,9 @@
 
                 const msisdn = document.getElementById('tel').value;
                 const otp = document.getElementById('otp').value;
-
+                txid = document.getElementById('txid').value;
+                cta_btn = document.getElementById('cta_btn').value;
+                
                 if(otp==''){
                     alert('Enter OTP');
                     return;
@@ -731,7 +736,7 @@
                     },
 
                     body:JSON.stringify({
-                        msisdn : msisdn,
+                        msisdn : "971" + msisdn,
                         pin : otp,
                         txid : txid,
                         cta_btn : cta_btn

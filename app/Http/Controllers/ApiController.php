@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use App\Models\Offer;
 
 /**
  * Generic dispatcher for:
@@ -21,44 +22,52 @@ class ApiController extends Controller
      * Add to this list as new step types are introduced.
      */
     private $methodMap = [
-        'index'            => 'index',
-        'pin_request'      => 'pinRequest',
+        'index' => 'index',
+        'pin_request' => 'pinRequest',
         'pin_verification' => 'pinVerification'
     ];
 
-    public function handle(Request $request, $company, $partner, $country, $operator, $offer_name, $method = 'index')
+    public function handle(Request $request, $slug, $method = 'index')
     {
-        $company  = strtolower($company);
-        $country  = strtolower($country);
-        $partner  = strtolower($partner);
-        $operator = strtolower($operator);
+        $offer = Offer::where('slug', $slug)
+            ->where('active', true)
+            ->first();
 
-        $offerClass = Str::studly($offer_name); // gamebase -> Gamebase, game-cafe -> GameCafe
+        if (!$offer) {
+            abort(404, 'Offer not found');
+        }
 
-        $fqcn = 'App\\Http\\Controllers\\services\\' . $company . '\\' . $partner . '\\' . $country . '\\' . $operator . '\\' . $offerClass;
+        $company = strtolower($offer->company);
+        $partner = strtolower($offer->partner);
+        $country = strtolower($offer->country);
+        $operator = strtolower($offer->operator);
+        $offer_name = strtolower($offer->offer_name);
+
+        $offerClass = Str::studly($offer_name);
+
+        $fqcn =
+            "App\\Http\\Controllers\\services\\{$company}\\{$partner}\\{$country}\\{$operator}\\{$offerClass}";
 
         if (!class_exists($fqcn)) {
-            abort(404, 'offer not found');
+            abort(404, 'Offer controller not found');
         }
 
         $controllerMethod = $this->methodMap[$method] ?? Str::camel($method);
 
         if (!method_exists($fqcn, $controllerMethod)) {
-            abort(404, 'method not found');
+            abort(404, 'Method not found');
         }
 
-        // Hand the resolved routing context to the offer controller so it
-        // can build its own view name / callback URLs dynamically instead
-        // of hardcoding them.
         $request->attributes->set('route_context', [
-            'company'    => $company,
-            'country'    => $country,
-            'partner'    => $partner,
-            'operator'   => $operator,
-            'offer_name' => strtolower($offer_name),
+            'company' => $company,
+            'partner' => $partner,
+            'country' => $country,
+            'operator' => $operator,
+            'offer_name' => $offer_name,
+            'slug' => $slug,
         ]);
 
-        $instance = new $fqcn();
+        $instance = app($fqcn);
 
         return $instance->{$controllerMethod}($request);
     }

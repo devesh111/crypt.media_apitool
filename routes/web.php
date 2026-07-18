@@ -2,19 +2,14 @@
 
 use App\Http\Controllers\ApiController;
 use Illuminate\Support\Facades\Route;
+// use App\Models\Offer;
 
-Route::match(['get', 'post'], '/{company}/{partner}/{country}/{operator}/{offer_name}/{method?}', [ApiController::class, 'handle'])
+Route::match(['get','post'], '/{slug}.html/{method?}', [ApiController::class, 'handle'])
     ->where([
-        'country'    => '[a-zA-Z]+',
-        'company'    => '[a-zA-Z]+',
-        'partner'    => '[a-zA-Z]+',
-        'operator'   => '[a-zA-Z]+',
-        'offer_name' => '[a-zA-Z0-9_-]+',
-        'method'     => '[a-zA-Z0-9_-]+',
-    ])
-    ->name('offer.dynamic');
+        'slug' => '[A-Za-z0-9]+',
+        'method' => '[A-Za-z0-9_-]+',
+    ]);
 
-// pin_request
-//1) msisdn
-//2) ip (optional)
-//3) ua (optional)
+// Route::get('/offers', function () {
+//     return Offer::all();
+// });
