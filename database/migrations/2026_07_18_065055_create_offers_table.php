@@ -13,11 +13,11 @@ return new class extends Migration {
             // Public URL
             $table->string('slug', 32)->unique();
 
-            $table->string('company');
-            $table->string('partner');
-            $table->string('country');
-            $table->string('operator');
-            $table->string('offer_name');
+            $table->string('company', 100);
+            $table->string('partner', 100);
+            $table->string('country', 50);
+            $table->string('operator', 100);
+            $table->string('offer_name', 150);
 
             $table->boolean('active')->default(true);
 
