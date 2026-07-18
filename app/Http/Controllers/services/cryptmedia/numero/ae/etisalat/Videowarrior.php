@@ -1,5 +1,5 @@
 <?php
-namespace App\Http\Controllers\services\cryptmedia\numero\ae\alphamovil;
+namespace App\Http\Controllers\services\cryptmedia\numero\ae\etisalat;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
