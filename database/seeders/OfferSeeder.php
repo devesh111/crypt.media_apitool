@@ -16,7 +16,7 @@ class OfferSeeder extends Seeder
             'partner' => 'numero',
             'country' => 'ae',
             'operator' => 'etisalat',
-            'offer_name' => 'videowarrior',
+            'offer_name' => 'dindolearn',
             'active' => true,
         ]);
     }
