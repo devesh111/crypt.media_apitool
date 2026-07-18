@@ -558,7 +558,7 @@
         <div class="container" id="container">
             <div class="header_new">
                 <p class="price-strip">
-                    <span data-lang="en">Free for 24 hours then AED 3.25/dalily (VAT Inclusive)</span>
+                    <span data-lang="en">Free for 24 hours then AED 3.25/Daily (VAT Inclusive)</span>
                 </p>
 
                 <div class="hero">
