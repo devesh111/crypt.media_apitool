@@ -608,7 +608,7 @@
                             <span data-lang="en">Subscribe</span>
                         </button>
                         <p class="text_after_btn">
-                            <span data-lang="en">Free for 24 hours then AED 3.25/weekly (VAT Inclusive).<br>After clicking "Subscribe" you will receive PIN message to Confirm your subscription.</span>
+                            <span data-lang="en">Free for 24 hours then AED 3.25/Daily (VAT Inclusive).<br>After clicking "Subscribe" you will receive PIN message to Confirm your subscription.</span>
                         </p>
                         <div class="bl_txt_btn_exit">
                             <a href="https://www.google.ae/" target="_blank" rel="noopener noreferrer">
