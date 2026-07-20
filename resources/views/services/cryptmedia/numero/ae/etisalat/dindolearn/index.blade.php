@@ -641,12 +641,15 @@
                 <p class="terms_heading" data-lang="en">TERMS AND CONDITIONS:</p>
 
                 <p data-lang="en">
-                    By proceeding, you are agreeing to Etisalat Terms & Conditions and Privacy Policy (visit etisalat.ae)
-                    <br>• Enjoy 24 hours Free trial (The free trial is valid only for new subscribers).
-                    <br>• After free trial, charges are 3.25 AED/day.
-                    <br>• Paid subscription starts after free trial automatically.
-                    <br>• No commitment, you can cancel your subscription at any time by sending C DND to 1111.
-                    <br>• Please make sure that your browser is not using any 3rd-party blocking technologies and you have a healthy internet connection for swift access to the content.
+                    Dindo Learn service is available exclusively for Etisalat users in the United Arab Emirates (UAE). 
+                    <br>• By subscribing to this service, users agree to receive daily gaming-related content and updates.
+                    <br>• The subscription fee is 3.25 AED per day, inclusive of all applicable taxes.
+                    <br>• To unsubscribe at any time, users can send C DND to 1111.
+                    <br>• The subscription will automatically renew daily unless cancelled.
+                    <br>• Standard data charges may apply for browsing or downloading content. 
+                    <br>• The PIN verification process ensures secure subscription with a 4-digit code sent via SMS.
+                    <br>• The service is valid for one day per renewal cycle.
+                    <br>• By proceeding, the user confirms they have obtained the bill payers cons.
                 </p>
             </div>
         </div>
