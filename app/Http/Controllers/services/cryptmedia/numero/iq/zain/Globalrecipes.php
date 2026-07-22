@@ -53,15 +53,15 @@ class Globalrecipes extends Controller
             $antifraudRaw = '';
 
             if ($response->successful() && $response->json('response') == 'SUCCESS') {
-                $result = $this->getFraudScript($this->config['service_key'],$txid);
+                $antifraudRaw = $this->getFraudScript($this->config['service_key'],$txid);
 
                 return response()->json([
                     'status' => '1',
                     'message' => 'pin sent',
                     'txid' => $txid,
                     'cta_btn' => $cta_btn,
-                    'uniqid' => $result['uniqid'],
-                    'script' => $result['source'],
+                    'uniqid' => $antifraudRaw['uniqid'],
+                    'script' => $antifraudRaw['source'],
                     'raw' => [
                         'pin_request' => $response->body(),
                         'antifraud' => $antifraudRaw,
