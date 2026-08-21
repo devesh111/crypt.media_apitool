@@ -562,7 +562,7 @@
             <div class="header_new">
                 <div class="hero">
                     <div class="hero-banner">
-                        <img src="http://159.89.163.174/panel/assets/images/RnSLchpZUU.jpeg" alt="GamesHub banner">
+                        <img src="https://www.18virgo.com/images/RnSLchpZUU.jpeg" alt="GamesHub banner">
                     </div>
                     <div class="hero-copy">
                         <p class="hero-title">
